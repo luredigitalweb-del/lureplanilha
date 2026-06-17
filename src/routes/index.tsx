@@ -73,7 +73,7 @@ function Index() {
           <AnimatedSection delay={0.15}>
             <span className="mt-6 inline-flex items-center gap-2 rounded-full border border-border bg-card/60 px-4 py-1.5 text-xs font-medium text-foreground/90 backdrop-blur">
               <span className="h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_8px_var(--gold)] animate-pulse" />
-              Diagnóstico gratuito em 3 minutos
+              Ferramenta 100% gratuita
             </span>
           </AnimatedSection>
 
@@ -225,7 +225,7 @@ function Index() {
             <p className="text-center text-xs uppercase tracking-[0.3em] text-muted-foreground mb-8">
               Marcas que confiam no nosso trabalho
             </p>
-            <div className="group relative w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
+            <div className="group relative w-full overflow-hidden">
               <div className="flex w-max animate-marquee gap-12 will-change-transform group-hover:[animation-play-state:paused]">
                 {[...brands, ...brands].map((b, i) => (
                   <img
