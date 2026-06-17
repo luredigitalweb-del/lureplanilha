@@ -14,15 +14,15 @@ import logo from "@/assets/lure-logo.png";
 import { GoldParticles } from "@/components/effects/GoldParticles";
 import { AnimatedSection } from "@/components/effects/AnimatedSection";
 import { SplashScreen } from "@/components/effects/SplashScreen";
-import brand14 from "@/assets/brand-14.png.asset.json";
-import brand15 from "@/assets/brand-15.png.asset.json";
-import brand16 from "@/assets/brand-16.png.asset.json";
-import brand17 from "@/assets/brand-17.png.asset.json";
-import brand18 from "@/assets/brand-18.png.asset.json";
-import brand19 from "@/assets/brand-19.png.asset.json";
-import brand20 from "@/assets/brand-20.png.asset.json";
-import brand21 from "@/assets/brand-21.png.asset.json";
-import brand22 from "@/assets/brand-22.png.asset.json";
+import brand14 from "@/assets/brand-14.png";
+import brand15 from "@/assets/brand-15.png";
+import brand16 from "@/assets/brand-16.png";
+import brand17 from "@/assets/brand-17.png";
+import brand18 from "@/assets/brand-18.png";
+import brand19 from "@/assets/brand-19.png";
+import brand20 from "@/assets/brand-20.png";
+import brand21 from "@/assets/brand-21.png";
+import brand22 from "@/assets/brand-22.png";
 
 const brands = [brand14, brand15, brand16, brand17, brand18, brand19, brand20, brand21, brand22];
 
@@ -230,7 +230,7 @@ function Index() {
                 {[...brands, ...brands].map((b, i) => (
                   <img
                     key={i}
-                    src={b.url}
+                    src={b}
                     alt="Marca parceira"
                     className="h-12 w-auto max-w-none shrink-0 object-contain opacity-70 transition-opacity hover:opacity-100 sm:h-16"
                   />
