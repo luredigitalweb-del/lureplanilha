@@ -360,3 +360,44 @@
 .animate-marquee {
   animation: marquee 30s linear infinite;
 }
+
+/* Redirect / planilha page */
+@keyframes redirect-spin {
+  to { transform: rotate(360deg); }
+}
+.animate-redirect-spin {
+  animation: redirect-spin 1.6s linear infinite;
+}
+
+@keyframes redirect-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-7px); }
+}
+.animate-redirect-float {
+  animation: redirect-float 3s ease-in-out infinite;
+}
+
+@keyframes redirect-pop {
+  0%   { opacity: 0; transform: scale(0.82); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.animate-redirect-pop {
+  animation: redirect-pop 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes redirect-halo {
+  0%, 100% { opacity: 0.35; transform: scale(0.96); }
+  50%      { opacity: 0.85; transform: scale(1.04); }
+}
+.animate-redirect-halo {
+  animation: redirect-halo 2.4s ease-in-out infinite;
+}
+
+@keyframes redirect-progress {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
+.animate-redirect-progress {
+  width: 0%;
+  animation: redirect-progress linear forwards;
+}

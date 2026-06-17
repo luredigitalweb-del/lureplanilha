@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -39,6 +39,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
+  const navigate = useNavigate();
   const [showSplash, setShowSplash] = useState(true);
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
@@ -119,11 +120,7 @@ function Index() {
                 className="mt-6 space-y-4"
                 onSubmit={(e) => {
                   e.preventDefault();
-                  window.open(
-                    "https://docs.google.com/spreadsheets/d/1YMadcn6XaXxGXfb1EpCeSBmvgYk9mQLf/edit?pli=1&gid=645027229#gid=645027229",
-                    "_blank",
-                    "noopener,noreferrer"
-                  );
+                  navigate({ to: "/planilha" });
                 }}
               >
                 <Input
