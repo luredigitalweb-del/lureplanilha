@@ -80,12 +80,12 @@ function Index() {
 
           <AnimatedSection delay={0.3}>
             <h1 className="mt-8 text-balance text-3xl font-bold leading-tight sm:text-4xl md:text-5xl">
-              Descubra quanto sua oficina precisa cobrar{" "}
+              Descubra quanto sua oficina precisa{" "}
               <span
                 className="bg-clip-text text-transparent shimmer-text"
                 style={{ backgroundImage: "var(--gradient-gold)" }}
               >
-                por hora
+                cobrar por hora
               </span>{" "}
               para vender com mais segurança, proteger sua margem e bater sua meta de faturamento.
             </h1>
