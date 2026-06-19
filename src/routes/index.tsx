@@ -26,6 +26,8 @@ import brand22 from "@/assets/brand-22.png";
 
 const brands = [brand14, brand15, brand16, brand17, brand18, brand19, brand20, brand21, brand22];
 
+const WEBHOOK_URL = "https://hook.us1.make.com/msos7xoccrjh4xulvjnii7lsi28pghsf";
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -120,6 +122,21 @@ function Index() {
                 className="mt-6 space-y-4"
                 onSubmit={(e) => {
                   e.preventDefault();
+                  fetch(WEBHOOK_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain;charset=UTF-8" },
+                    body: JSON.stringify({
+                      nome,
+                      email,
+                      telefone,
+                      empresa,
+                      investimento,
+                      faturamento,
+                      parceiro,
+                      enviado_em: new Date().toISOString(),
+                    }),
+                    keepalive: true,
+                  }).catch(() => {});
                   navigate({ to: "/planilha" });
                 }}
               >
