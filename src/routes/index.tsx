@@ -28,6 +28,55 @@ const brands = [brand14, brand15, brand16, brand17, brand18, brand19, brand20, b
 
 const WEBHOOK_URL = "https://hook.us1.make.com/msos7xoccrjh4xulvjnii7lsi28pghsf";
 
+const INVESTIMENTO_LABELS: Record<string, string> = {
+  "0-600": "0 a 600 reais por mês",
+  "601-1200": "601 a 1.200 reais por mês",
+  "1201-2500": "1.201 a 2.500 reais por mês",
+  "2501-4000": "2.501 a 4.000 reais por mês",
+  "4001-10000": "4.001 a 10.000 reais por mês",
+  "10k+": "Mais de 10 mil por mês",
+};
+
+const FATURAMENTO_LABELS: Record<string, string> = {
+  "ate-20k": "Até 20 mil",
+  "20-40k": "De 20 mil até 40 mil",
+  "40-60k": "De 40 mil até 60 mil",
+  "60-80k": "De 60 mil até 80 mil",
+  "80-100k": "De 80 mil até 100 mil",
+  "100-150k": "De 100 mil até 150 mil",
+  "150-250k": "De 150 mil até 250 mil",
+  "250-400k": "De 250 mil até 400 mil",
+  "400-600k": "De 400 mil até 600 mil",
+  "600k-1m": "De 600 mil até 1 milhão",
+  "1m+": "Mais de 1 milhão",
+};
+
+const PARCEIRO_LABELS: Record<string, string> = {
+  sim: "Sim, já sou parceiro",
+  nao: "Não, ainda não sou",
+  "ja-fui": "Já fui parceiro",
+  "nao-sei": "Não sei / Não tenho certeza",
+};
+
+// Normalize a Brazilian phone to "+55" + digits, e.g. "(85) 98953-4982" -> "+5585989534982".
+function formatPhone(raw: string): string {
+  const digits = raw.replace(/\D/g, "").replace(/^55/, "");
+  return digits ? `+55${digits}` : "";
+}
+
+function formatSubmittedAt(date: Date): string {
+  const datePart = date.toLocaleDateString("pt-BR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+  const timePart = date.toLocaleTimeString("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  return `${datePart} às ${timePart}`;
+}
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -123,14 +172,16 @@ function Index() {
                 onSubmit={async (e) => {
                   e.preventDefault();
                   const params = new URLSearchParams({
-                    nome,
+                    event: "lead_submitted",
+                    name: nome,
                     email,
-                    telefone,
-                    empresa,
-                    investimento,
-                    faturamento,
-                    parceiro,
-                    enviado_em: new Date().toISOString(),
+                    phone: formatPhone(telefone),
+                    companyName: empresa,
+                    marketingInvestment: INVESTIMENTO_LABELS[investimento] ?? investimento,
+                    revenue: FATURAMENTO_LABELS[faturamento] ?? faturamento,
+                    partnerStatus: PARCEIRO_LABELS[parceiro] ?? parceiro,
+                    leadId: crypto.randomUUID(),
+                    submittedAt: formatSubmittedAt(new Date()),
                   });
                   // URLSearchParams sends application/x-www-form-urlencoded,
                   // which Make splits into named fields and is CORS-safe (no preflight).
