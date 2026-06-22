@@ -28,28 +28,18 @@ const brands = [brand14, brand15, brand16, brand17, brand18, brand19, brand20, b
 
 const WEBHOOK_URL = "https://hook.us1.make.com/msos7xoccrjh4xulvjnii7lsi28pghsf";
 
-// Always send the phone as "+55" + digits, e.g. "(85) 98953-4982" -> "+5585989534982".
-// Strips a leading 55 country code only when it's clearly extra (more digits than a
-// local DDD + number), so DDD 55 (RS) numbers are kept intact.
-function formatPhone(raw: string): string {
-  let digits = raw.replace(/\D/g, "");
-  if (digits.length > 11 && digits.startsWith("55")) {
-    digits = digits.slice(2);
+// Clean the phone before sending:
+//  - keep only digits
+//  - drop leading zeros
+//  - add the "55" country code when the number has 10 or 11 digits (no DDI)
+//  - if it already comes with 55 (12-13 digits), keep it
+// e.g. "(41) 99988-7766" -> "5541999887766"; "041 99918-7801" -> "5541999187801".
+function limparTelefone(raw: string): string {
+  let d = raw.replace(/\D/g, "").replace(/^0+/, "");
+  if (d.length === 10 || d.length === 11) {
+    d = `55${d}`;
   }
-  return digits ? `+55${digits}` : "";
-}
-
-function formatSubmittedAt(date: Date): string {
-  const datePart = date.toLocaleDateString("pt-BR", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-  const timePart = date.toLocaleTimeString("pt-BR", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-  return `${datePart} às ${timePart}`;
+  return d;
 }
 
 export const Route = createFileRoute("/")({
@@ -74,6 +64,8 @@ function Index() {
   const [investimento, setInvestimento] = useState("");
   const [faturamento, setFaturamento] = useState("");
   const [parceiro, setParceiro] = useState("");
+  const [enviando, setEnviando] = useState(false);
+  const [erro, setErro] = useState("");
 
   const handleCardMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -146,27 +138,40 @@ function Index() {
                 className="mt-6 space-y-4"
                 onSubmit={async (e) => {
                   e.preventDefault();
-                  const params = new URLSearchParams({
-                    nome,
-                    email,
-                    telefone: formatPhone(telefone),
-                    empresa,
-                    investimento,
-                    faturamento,
-                    parceiro,
-                    enviado_em: formatSubmittedAt(new Date()),
-                  });
-                  // URLSearchParams sends application/x-www-form-urlencoded,
-                  // which Make splits into named fields and is CORS-safe (no preflight).
-                  // Wait for the POST to finish before navigating so the body is
-                  // actually delivered, but cap the wait so the user is never stuck.
-                  const send = fetch(WEBHOOK_URL, {
-                    method: "POST",
-                    body: params,
-                  }).catch(() => {});
-                  const timeout = new Promise((resolve) => setTimeout(resolve, 2500));
-                  await Promise.race([send, timeout]);
-                  navigate({ to: "/planilha" });
+                  if (enviando) return; // evita envio duplo
+                  setEnviando(true);
+                  setErro("");
+
+                  // Captura os UTMs da URL (vazio quando não existirem).
+                  const url = new URLSearchParams(window.location.search);
+                  const payload = {
+                    nome: nome || "",
+                    empresa: empresa || "",
+                    telefone: limparTelefone(telefone),
+                    email: email || "",
+                    investimento: investimento || "",
+                    faturamento: faturamento || "",
+                    parceiro: parceiro || "",
+                    utm_source: url.get("utm_source") || "",
+                    utm_medium: url.get("utm_medium") || "",
+                    utm_campaign: url.get("utm_campaign") || "",
+                    utm_term: url.get("utm_term") || "",
+                    utm_content: url.get("utm_content") || "",
+                  };
+
+                  try {
+                    const res = await fetch(WEBHOOK_URL, {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify(payload),
+                    });
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    navigate({ to: "/planilha" });
+                  } catch (err) {
+                    console.error("Falha ao enviar o formulário:", err);
+                    setErro("Não foi possível enviar agora. Tente novamente em instantes.");
+                    setEnviando(false);
+                  }
                 }}
               >
                 <Input
@@ -253,15 +258,22 @@ function Index() {
 
                 <Button
                   type="submit"
-                  className="btn-cta group mt-2 h-12 w-full rounded-xl text-base font-semibold text-primary-foreground"
+                  disabled={enviando}
+                  className="btn-cta group mt-2 h-12 w-full rounded-xl text-base font-semibold text-primary-foreground disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  Acesse sua planilha
-                  <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                  {enviando ? "Enviando..." : "Acesse sua planilha"}
+                  {!enviando && (
+                    <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                  )}
                 </Button>
 
-                <p className="text-center text-xs text-muted-foreground">
-                  Clique para abrir sua planilha no Google Sheets
-                </p>
+                {erro ? (
+                  <p className="text-center text-xs text-destructive">{erro}</p>
+                ) : (
+                  <p className="text-center text-xs text-muted-foreground">
+                    Clique para abrir sua planilha no Google Sheets
+                  </p>
+                )}
               </form>
             </div>
           </section>
