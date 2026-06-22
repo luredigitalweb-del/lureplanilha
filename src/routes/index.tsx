@@ -28,16 +28,14 @@ const brands = [brand14, brand15, brand16, brand17, brand18, brand19, brand20, b
 
 const WEBHOOK_URL = "https://hook.us1.make.com/msos7xoccrjh4xulvjnii7lsi28pghsf";
 
-// Clean the phone before sending:
-//  - keep only digits
-//  - drop leading zeros
-//  - add the "55" country code when the number has 10 or 11 digits (no DDI)
-//  - if it already comes with 55 (12-13 digits), keep it
-// e.g. "(41) 99988-7766" -> "5541999887766"; "041 99918-7801" -> "5541999187801".
+// Clean the phone before sending: keep only digits and drop leading zeros.
+// The "+55" country code is added by the Make automation, so we do NOT add it
+// here (and we strip a leading 55 if the user typed it, to avoid duplication).
+// e.g. "(41) 99988-7766" -> "41999887766"; "041 99918-7801" -> "41999187801".
 function limparTelefone(raw: string): string {
   let d = raw.replace(/\D/g, "").replace(/^0+/, "");
-  if (d.length === 10 || d.length === 11) {
-    d = `55${d}`;
+  if (d.length > 11 && d.startsWith("55")) {
+    d = d.slice(2);
   }
   return d;
 }
@@ -188,21 +186,16 @@ function Index() {
                   className="h-12 rounded-xl border-border bg-secondary/60 px-4 text-sm text-foreground placeholder:text-muted-foreground transition-all duration-300 focus-visible:ring-1 focus-visible:ring-primary hover:bg-secondary/80"
                 />
 
-                <div className="flex h-12 overflow-hidden rounded-xl border border-border bg-secondary/60 transition-all duration-300 hover:bg-secondary/80 focus-within:ring-1 focus-within:ring-primary">
-                  <div className="flex items-center border-r border-border bg-card/60 px-3 text-sm text-muted-foreground">
-                    +55
-                  </div>
-                  <Input
-                    type="tel"
-                    inputMode="numeric"
-                    required
-                    maxLength={11}
-                    placeholder="11999999999"
-                    value={telefone}
-                    onChange={(e) => setTelefone(e.target.value.replace(/\D/g, ""))}
-                    className="h-full flex-1 border-0 bg-transparent px-4 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-0"
-                  />
-                </div>
+                <Input
+                  type="tel"
+                  inputMode="numeric"
+                  required
+                  maxLength={11}
+                  placeholder="DDD + número (ex: 11999999999)"
+                  value={telefone}
+                  onChange={(e) => setTelefone(e.target.value.replace(/\D/g, ""))}
+                  className="h-12 rounded-xl border-border bg-secondary/60 px-4 text-sm text-foreground placeholder:text-muted-foreground transition-all duration-300 focus-visible:ring-1 focus-visible:ring-primary hover:bg-secondary/80"
+                />
 
                 <Input
                   placeholder="Nome da sua empresa"
