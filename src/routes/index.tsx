@@ -122,19 +122,21 @@ function Index() {
                 className="mt-6 space-y-4"
                 onSubmit={(e) => {
                   e.preventDefault();
+                  const params = new URLSearchParams({
+                    nome,
+                    email,
+                    telefone,
+                    empresa,
+                    investimento,
+                    faturamento,
+                    parceiro,
+                    enviado_em: new Date().toISOString(),
+                  });
+                  // URLSearchParams sends application/x-www-form-urlencoded,
+                  // which Make splits into named fields and is CORS-safe (no preflight).
                   fetch(WEBHOOK_URL, {
                     method: "POST",
-                    headers: { "Content-Type": "text/plain;charset=UTF-8" },
-                    body: JSON.stringify({
-                      nome,
-                      email,
-                      telefone,
-                      empresa,
-                      investimento,
-                      faturamento,
-                      parceiro,
-                      enviado_em: new Date().toISOString(),
-                    }),
+                    body: params,
                     keepalive: true,
                   }).catch(() => {});
                   navigate({ to: "/planilha" });
