@@ -189,9 +189,12 @@ function Index() {
                   </div>
                   <Input
                     type="tel"
-                    placeholder="(11) 99999-9999"
+                    inputMode="numeric"
+                    required
+                    maxLength={11}
+                    placeholder="11999999999"
                     value={telefone}
-                    onChange={(e) => setTelefone(e.target.value)}
+                    onChange={(e) => setTelefone(e.target.value.replace(/\D/g, ""))}
                     className="h-full flex-1 border-0 bg-transparent px-4 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-0"
                   />
                 </div>
