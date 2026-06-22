@@ -58,9 +58,14 @@ const PARCEIRO_LABELS: Record<string, string> = {
   "nao-sei": "Não sei / Não tenho certeza",
 };
 
-// Normalize a Brazilian phone to "+55" + digits, e.g. "(85) 98953-4982" -> "+5585989534982".
+// Always send the phone as "+55" + digits, e.g. "(85) 98953-4982" -> "+5585989534982".
+// Strips a leading 55 country code only when it's clearly extra (more digits than a
+// local DDD + number), so DDD 55 (RS) numbers are kept intact.
 function formatPhone(raw: string): string {
-  const digits = raw.replace(/\D/g, "").replace(/^55/, "");
+  let digits = raw.replace(/\D/g, "");
+  if (digits.length > 11 && digits.startsWith("55")) {
+    digits = digits.slice(2);
+  }
   return digits ? `+55${digits}` : "";
 }
 
