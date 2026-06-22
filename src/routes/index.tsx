@@ -120,7 +120,7 @@ function Index() {
 
               <form
                 className="mt-6 space-y-4"
-                onSubmit={(e) => {
+                onSubmit={async (e) => {
                   e.preventDefault();
                   const params = new URLSearchParams({
                     nome,
@@ -134,11 +134,14 @@ function Index() {
                   });
                   // URLSearchParams sends application/x-www-form-urlencoded,
                   // which Make splits into named fields and is CORS-safe (no preflight).
-                  fetch(WEBHOOK_URL, {
+                  // Wait for the POST to finish before navigating so the body is
+                  // actually delivered, but cap the wait so the user is never stuck.
+                  const send = fetch(WEBHOOK_URL, {
                     method: "POST",
                     body: params,
-                    keepalive: true,
                   }).catch(() => {});
+                  const timeout = new Promise((resolve) => setTimeout(resolve, 2500));
+                  await Promise.race([send, timeout]);
                   navigate({ to: "/planilha" });
                 }}
               >
