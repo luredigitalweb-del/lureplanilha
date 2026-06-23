@@ -1,27 +1,22 @@
-import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { FileSpreadsheet, ArrowRight, Check } from "lucide-react";
+import { FileSpreadsheet, Copy, Download, Check } from "lucide-react";
 import logo from "@/assets/lure-logo.png";
 import { GoldParticles } from "@/components/effects/GoldParticles";
 
-const SHEET_URL =
-  "https://docs.google.com/spreadsheets/d/1YMadcn6XaXxGXfb1EpCeSBmvgYk9mQLf/edit?pli=1&gid=645027229#gid=645027229";
-
-const REDIRECT_MS = 4200;
-
-const STEPS = [
-  "Validando seus dados",
-  "Gerando sua planilha",
-  "Abrindo o Google Sheets",
-];
+const SHEET_ID = "1YMadcn6XaXxGXfb1EpCeSBmvgYk9mQLf";
+// "/copy" opens Google's "Make a copy" dialog, giving each person their own
+// editable copy in their Drive (no conflicts on the shared file).
+const COPY_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/copy`;
+// "/export?format=xlsx" downloads the spreadsheet as an Excel file.
+const EXPORT_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=xlsx`;
 
 export const Route = createFileRoute("/planilha")({
   head: () => ({
     meta: [
-      { title: "Abrindo sua planilha — Lure Digital" },
+      { title: "Sua planilha está pronta — Lure Digital" },
       {
         name: "description",
-        content: "Estamos preparando sua planilha. Você será redirecionado em instantes.",
+        content: "Faça a sua cópia da planilha ou baixe em Excel para usar sem conflitos.",
       },
     ],
   }),
@@ -29,29 +24,6 @@ export const Route = createFileRoute("/planilha")({
 });
 
 function Planilha() {
-  const [count, setCount] = useState(Math.ceil(REDIRECT_MS / 1000));
-  const [step, setStep] = useState(0);
-
-  useEffect(() => {
-    const start = Date.now();
-
-    const tick = window.setInterval(() => {
-      const elapsed = Date.now() - start;
-      const remaining = Math.max(0, REDIRECT_MS - elapsed);
-      setCount(Math.ceil(remaining / 1000));
-      setStep(Math.min(STEPS.length - 1, Math.floor((elapsed / REDIRECT_MS) * STEPS.length)));
-    }, 200);
-
-    const go = window.setTimeout(() => {
-      window.location.href = SHEET_URL;
-    }, REDIRECT_MS);
-
-    return () => {
-      window.clearInterval(tick);
-      window.clearTimeout(go);
-    };
-  }, []);
-
   return (
     <div
       className="relative flex min-h-screen items-center justify-center overflow-hidden px-5 text-foreground"
@@ -72,15 +44,13 @@ function Planilha() {
           className="h-14 w-auto animate-redirect-float drop-shadow-[0_4px_20px_oklch(0.82_0.16_82/0.25)]"
         />
 
-        {/* Spinning ring with spreadsheet icon */}
+        {/* Ring with spreadsheet icon + success check */}
         <div className="relative mt-12 flex h-44 w-44 items-center justify-center">
-          {/* outer pulse halo */}
           <div
             className="absolute inset-2 animate-redirect-halo rounded-full"
             style={{ boxShadow: "0 0 60px -10px var(--gold)" }}
           />
 
-          {/* conic gold ring */}
           <div
             className="absolute inset-0 animate-redirect-spin rounded-full"
             style={{
@@ -92,86 +62,52 @@ function Planilha() {
             }}
           />
 
-          {/* inner disc */}
           <div className="relative flex h-28 w-28 animate-redirect-pop items-center justify-center rounded-full border border-border bg-card/60 shadow-[0_0_50px_-10px_var(--gold)] backdrop-blur">
-            <FileSpreadsheet className="h-12 w-12 animate-redirect-float text-primary" />
+            <FileSpreadsheet className="h-12 w-12 text-primary" />
+            <span className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full border-2 border-card bg-primary text-primary-foreground shadow-lg">
+              <Check className="h-4 w-4" />
+            </span>
           </div>
         </div>
 
         <h1 className="mt-10 text-2xl font-bold leading-tight sm:text-3xl">
-          Preparando sua{" "}
+          Sua{" "}
           <span
             className="bg-clip-text text-transparent shimmer-text"
             style={{ backgroundImage: "var(--gradient-gold)" }}
           >
             planilha
-          </span>
+          </span>{" "}
+          está pronta!
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Tudo certo! Estamos te levando ao Google Sheets.
+        <p className="mt-3 text-sm text-muted-foreground">
+          Para usar sem conflitos, faça a <strong className="text-foreground/90">sua cópia</strong> —
+          assim você edita só a sua, sem mexer na de outras pessoas.
         </p>
 
-        {/* Steps */}
-        <ul className="mt-7 flex w-full flex-col gap-2.5 text-left">
-          {STEPS.map((label, i) => {
-            const done = i < step;
-            const active = i === step;
-            return (
-              <li
-                key={label}
-                className="flex items-center gap-3 text-sm transition-all duration-500"
-                style={{ opacity: i <= step ? 1 : 0.4 }}
-              >
-                <span
-                  className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border transition-all duration-500 ${
-                    done
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : active
-                        ? "border-primary text-primary"
-                        : "border-border text-muted-foreground"
-                  }`}
-                >
-                  {done ? (
-                    <Check className="h-3.5 w-3.5" />
-                  ) : active ? (
-                    <span className="h-2 w-2 animate-pulse rounded-full bg-primary" />
-                  ) : (
-                    <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60" />
-                  )}
-                </span>
-                <span className={done || active ? "text-foreground/90" : "text-muted-foreground"}>
-                  {label}
-                </span>
-              </li>
-            );
-          })}
-        </ul>
-
-        {/* Progress bar */}
-        <div className="mt-8 h-1.5 w-full overflow-hidden rounded-full bg-secondary/60">
-          <div
-            className="h-full animate-redirect-progress rounded-full"
-            style={{ background: "var(--gradient-gold)", animationDuration: `${REDIRECT_MS}ms` }}
-          />
-        </div>
-
-        <p className="mt-4 text-xs uppercase tracking-[0.3em] text-muted-foreground">
-          Redirecionando em {count}s
-        </p>
-
+        {/* Primary: make a copy */}
         <a
-          href={SHEET_URL}
-          className="btn-cta group mt-8 inline-flex h-12 items-center justify-center rounded-xl px-6 text-base font-semibold text-primary-foreground"
+          href={COPY_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-cta group mt-8 inline-flex h-12 w-full items-center justify-center rounded-xl px-6 text-base font-semibold text-primary-foreground"
         >
-          Abrir planilha agora
-          <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+          <Copy className="mr-2 h-5 w-5" />
+          Fazer minha cópia no Google Sheets
         </a>
 
-        <p className="mt-4 text-xs text-muted-foreground">
-          Não abriu?{" "}
-          <a href={SHEET_URL} className="text-primary underline-offset-4 hover:underline">
-            Clique aqui
-          </a>
+        {/* Secondary: download xlsx */}
+        <a
+          href={EXPORT_URL}
+          className="mt-3 inline-flex h-12 w-full items-center justify-center rounded-xl border border-border bg-card/40 px-6 text-base font-semibold text-foreground backdrop-blur transition-colors duration-300 hover:bg-card/70"
+        >
+          <Download className="mr-2 h-5 w-5 text-primary" />
+          Baixar em Excel (.xlsx)
+        </a>
+
+        <p className="mt-5 text-xs text-muted-foreground">
+          A opção de cópia abre no seu Google Drive (precisa estar logado numa conta Google). O Excel
+          baixa direto no seu dispositivo.
         </p>
       </div>
     </div>
