@@ -40,6 +40,18 @@ function limparTelefone(raw: string): string {
   return d;
 }
 
+// Bandeira do Brasil ao lado do "+55" fixo do campo de telefone.
+// SVG inline porque o emoji 🇧🇷 não renderiza como bandeira no Windows.
+function BandeiraBR() {
+  return (
+    <svg viewBox="0 0 28 20" className="h-4 w-6 shrink-0 rounded-[2px]" aria-hidden="true">
+      <rect width="28" height="20" fill="#009B3A" />
+      <path d="M14 2.5 25.5 10 14 17.5 2.5 10Z" fill="#FEDF00" />
+      <circle cx="14" cy="10" r="4.2" fill="#002776" />
+    </svg>
+  );
+}
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -186,16 +198,28 @@ function Index() {
                   className="h-12 rounded-xl border-border bg-secondary/60 px-4 text-sm text-foreground placeholder:text-muted-foreground transition-all duration-300 focus-visible:ring-1 focus-visible:ring-primary hover:bg-secondary/80"
                 />
 
-                <Input
-                  type="tel"
-                  inputMode="numeric"
-                  required
-                  maxLength={11}
-                  placeholder="DDD + número (ex: 11999999999)"
-                  value={telefone}
-                  onChange={(e) => setTelefone(e.target.value.replace(/\D/g, ""))}
-                  className="h-12 rounded-xl border-border bg-secondary/60 px-4 text-sm text-foreground placeholder:text-muted-foreground transition-all duration-300 focus-visible:ring-1 focus-visible:ring-primary hover:bg-secondary/80"
-                />
+                {/* O "+55" é fixo (visual): o state guarda só DDD + número. */}
+                <div className="flex h-12 items-center gap-2 rounded-xl border border-border bg-secondary/60 px-4 transition-all duration-300 hover:bg-secondary/80 focus-within:ring-1 focus-within:ring-primary">
+                  <BandeiraBR />
+                  <span className="shrink-0 text-sm text-foreground/80">+55</span>
+                  <span className="h-5 w-px shrink-0 bg-border" />
+                  <input
+                    type="tel"
+                    inputMode="numeric"
+                    required
+                    autoComplete="tel-national"
+                    aria-label="Telefone com DDD"
+                    placeholder="DDD + número"
+                    value={telefone}
+                    onChange={(e) => {
+                      // Se colarem "+55 41 99988-7766", tira o 55 em vez de cortar o fim.
+                      let d = e.target.value.replace(/\D/g, "").replace(/^0+/, "");
+                      if (d.length > 11 && d.startsWith("55")) d = d.slice(2);
+                      setTelefone(d.slice(0, 11));
+                    }}
+                    className="h-full w-full min-w-0 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
+                  />
+                </div>
 
                 <Input
                   placeholder="Nome da sua empresa"
